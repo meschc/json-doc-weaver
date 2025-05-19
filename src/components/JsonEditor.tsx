@@ -1,5 +1,7 @@
 
 import { useState, useEffect } from "react";
+import CodeMirror from "@uiw/react-codemirror";
+import { json } from "@codemirror/lang-json";
 
 interface JsonEditorProps {
   data: Record<string, any>;
@@ -14,12 +16,11 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
     setContent(JSON.stringify(data, null, 2));
   }, [data]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newContent = e.target.value;
-    setContent(newContent);
+  const handleChange = (value: string) => {
+    setContent(value);
     
     try {
-      const parsed = JSON.parse(newContent);
+      const parsed = JSON.parse(value);
       onChange(parsed);
       setError(null);
     } catch (err) {
@@ -30,15 +31,24 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
   return (
     <div className="relative h-full">
       {error && (
-        <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded text-sm animate-fade-in">
+        <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded text-sm animate-fade-in z-10">
           {error}
         </div>
       )}
-      <textarea
-        className="editor-container focus:outline-none resize-none"
+      <CodeMirror
         value={content}
+        height="100%"
+        extensions={[json()]}
         onChange={handleChange}
-        spellCheck="false"
+        theme="light"
+        className="h-full"
+        basicSetup={{
+          lineNumbers: true,
+          highlightActiveLine: true,
+          highlightSelectionMatches: true,
+          autocompletion: true,
+          foldGutter: true,
+        }}
       />
     </div>
   );
