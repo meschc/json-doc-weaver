@@ -1,12 +1,195 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState, useEffect } from "react";
+import { toast } from "@/components/ui/use-toast";
+import JsonEditor from "@/components/JsonEditor";
+import DocumentEditor from "@/components/DocumentEditor";
+import { Button } from "@/components/ui/button";
+import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { FileJson, FileText, Download, Upload } from "lucide-react";
 
 const Index = () => {
+  const [jsonData, setJsonData] = useState<Record<string, any>>({
+    name: "Kir",
+    company: "Acme Inc.",
+    position: "Developer",
+    email: "kir@example.com"
+  });
+  
+  const [documentContent, setDocumentContent] = useState<string>(
+    "Hello {name},\n\nThank you for your interest in working at {company}. We're excited about your application for the {position} role.\n\nWe'll contact you at {email} with further information about the next steps.\n\nRegards,\nThe HR Team"
+  );
+
+  const handleExportJson = () => {
+    const dataStr = JSON.stringify(jsonData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'data.json';
+    link.click();
+    
+    URL.revokeObjectURL(url);
+    toast({
+      title: "JSON Exported",
+      description: "Your JSON data has been exported successfully.",
+    });
+  };
+
+  const handleExportDocument = () => {
+    // Replace all placeholder patterns with their values
+    let processedContent = documentContent;
+    Object.entries(jsonData).forEach(([key, value]) => {
+      const placeholder = new RegExp(`{${key}}`, 'g');
+      processedContent = processedContent.replace(placeholder, String(value));
+    });
+    
+    const dataBlob = new Blob([processedContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'document.txt';
+    link.click();
+    
+    URL.revokeObjectURL(url);
+    toast({
+      title: "Document Exported",
+      description: "Your document has been exported successfully.",
+    });
+  };
+
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        setJsonData(json);
+        toast({
+          title: "JSON Imported",
+          description: "Your JSON data has been imported successfully.",
+        });
+      } catch (err) {
+        toast({
+          title: "Error Importing JSON",
+          description: "The file is not a valid JSON file.",
+          variant: "destructive"
+        });
+      }
+    };
+    
+    reader.readAsText(file);
+  };
+
+  const handleImportDocument = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      setDocumentContent(event.target?.result as string);
+      toast({
+        title: "Document Imported",
+        description: "Your document has been imported successfully.",
+      });
+    };
+    
+    reader.readAsText(file);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="flex flex-col h-screen">
+      <header className="border-b py-3 px-6 bg-white flex items-center justify-between">
+        <h1 className="text-xl font-semibold flex items-center gap-2">
+          JSON Document Editor
+        </h1>
+      </header>
+
+      <main className="flex-1 overflow-hidden">
+        <ResizablePanelGroup
+          direction="horizontal"
+          className="h-full"
+        >
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <div className="h-full flex flex-col">
+              <div className="p-4 border-b flex justify-between items-center bg-white">
+                <div className="flex items-center gap-2">
+                  <FileJson className="h-5 w-5 text-primary" />
+                  <h2 className="font-medium">JSON Data</h2>
+                </div>
+                <div className="flex gap-2">
+                  <label htmlFor="import-json">
+                    <Button variant="outline" size="sm" className="cursor-pointer" asChild>
+                      <div className="flex items-center gap-1">
+                        <Upload className="h-4 w-4" />
+                        <span>Import</span>
+                      </div>
+                    </Button>
+                  </label>
+                  <input
+                    id="import-json"
+                    type="file"
+                    accept=".json"
+                    onChange={handleImportJson}
+                    className="hidden"
+                  />
+                  <Button size="sm" variant="outline" onClick={handleExportJson} className="flex items-center gap-1">
+                    <Download className="h-4 w-4" />
+                    <span>Export</span>
+                  </Button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <JsonEditor data={jsonData} onChange={setJsonData} />
+              </div>
+            </div>
+          </ResizablePanel>
+
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <div className="h-full flex flex-col">
+              <div className="p-4 border-b flex justify-between items-center bg-white">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <h2 className="font-medium">Document Template</h2>
+                </div>
+                <div className="flex gap-2">
+                  <label htmlFor="import-document">
+                    <Button variant="outline" size="sm" className="cursor-pointer" asChild>
+                      <div className="flex items-center gap-1">
+                        <Upload className="h-4 w-4" />
+                        <span>Import</span>
+                      </div>
+                    </Button>
+                  </label>
+                  <input
+                    id="import-document"
+                    type="file"
+                    accept=".txt,.md,.html"
+                    onChange={handleImportDocument}
+                    className="hidden"
+                  />
+                  <Button size="sm" variant="outline" onClick={handleExportDocument} className="flex items-center gap-1">
+                    <Download className="h-4 w-4" />
+                    <span>Export</span>
+                  </Button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <DocumentEditor 
+                  content={documentContent} 
+                  onChange={setDocumentContent} 
+                  jsonData={jsonData}
+                />
+              </div>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </main>
     </div>
   );
 };
