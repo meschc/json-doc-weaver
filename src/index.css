@@ -5,8 +5,8 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 100%;
+    --foreground: 222 84% 4.9%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 221.2 83% 53%;
+    --primary: 220 80% 56%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -33,7 +33,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.8rem;
   }
 
   .dark {
@@ -87,13 +87,16 @@
 .transition-all {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition-duration: 300ms;
 }
 
 /* CodeMirror customization for Apple-style aesthetics */
 .cm-editor {
-  border-radius: 0.375rem;
+  border-radius: 0.6rem;
   font-family: "SF Mono", SFMono-Regular, ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
   overflow: hidden;
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .cm-scroller {
@@ -102,7 +105,14 @@
 }
 
 .cm-content {
-  padding: 0.5rem;
+  padding: 1rem 0.75rem;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.cm-gutters {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 /* Custom scrollbar styling */
@@ -116,29 +126,50 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.15);
   border-radius: 20px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.25);
 }
 
 /* Placeholder highlighting */
 .document-editor .cm-content span.json-highlight {
-  background-color: #E2F0FF;
+  background-color: rgba(59, 130, 246, 0.12);
   color: #3B82F6;
-  border-radius: 3px;
+  border-radius: 4px;
   padding: 0 4px;
   transition: background-color 0.2s ease;
 }
 
 /* Add smooth animations */
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: fade-in 0.3s cubic-bezier(0.27, 0.1, 0.25, 1) forwards;
+}
+
+/* Glass morphism effects */
+.glass {
+  backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.glass-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 }

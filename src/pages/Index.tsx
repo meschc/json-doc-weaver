@@ -1,11 +1,12 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "@/components/ui/use-toast";
 import JsonEditor from "@/components/JsonEditor";
 import DocumentEditor from "@/components/DocumentEditor";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { FileJson, FileText, Download, Upload, FileCode } from "lucide-react";
+import { FileJson, FileText, Import, Export, FileCode, Pencil } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 const Index = () => {
   const [jsonData, setJsonData] = useState<Record<string, any>>({
@@ -20,30 +21,57 @@ const Index = () => {
   );
 
   const [documentType, setDocumentType] = useState<string>("txt");
+  const [jsonFilename, setJsonFilename] = useState<string>("data.json");
+  const [documentFilename, setDocumentFilename] = useState<string>("document.txt");
+  const [editingJsonFilename, setEditingJsonFilename] = useState<boolean>(false);
+  const [editingDocumentFilename, setEditingDocumentFilename] = useState<boolean>(false);
+
+  const jsonFilenameInputRef = useRef<HTMLInputElement>(null);
+  const documentFilenameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingJsonFilename && jsonFilenameInputRef.current) {
+      jsonFilenameInputRef.current.focus();
+    }
+  }, [editingJsonFilename]);
+
+  useEffect(() => {
+    if (editingDocumentFilename && documentFilenameInputRef.current) {
+      documentFilenameInputRef.current.focus();
+    }
+  }, [editingDocumentFilename]);
 
   const handleExportJson = () => {
-    const dataStr = JSON.stringify(jsonData, null, 2);
+    let dataStr;
+    // Handle potentially invalid JSON that was preserved during editing
+    if (jsonData._invalidContent) {
+      dataStr = jsonData._invalidContent;
+    } else {
+      dataStr = JSON.stringify(jsonData, null, 2);
+    }
+    
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'data.json';
+    link.download = jsonFilename;
     link.click();
     
     URL.revokeObjectURL(url);
     toast({
       title: "JSON Exported",
-      description: "Your JSON data has been exported successfully.",
+      description: `File "${jsonFilename}" has been exported successfully.`,
     });
   };
 
   const handleExportDocument = () => {
     // Replace all placeholder patterns with their values
     let processedContent = documentContent;
-    Object.entries(jsonData).forEach(([key, value]) => {
-      const placeholder = new RegExp(`{${key}}`, 'g');
-      processedContent = processedContent.replace(placeholder, String(value));
+    const placeholderRegex = /{([^}]+)}/g;
+    processedContent = processedContent.replace(placeholderRegex, (match, key) => {
+      const value = jsonData[key];
+      return value !== undefined ? String(value) : match;
     });
     
     let mimeType = 'text/plain';
@@ -58,13 +86,13 @@ const Index = () => {
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = `document.${documentType}`;
+    link.download = documentFilename;
     link.click();
     
     URL.revokeObjectURL(url);
     toast({
       title: "Document Exported",
-      description: "Your document has been exported successfully.",
+      description: `File "${documentFilename}" has been exported successfully.`,
     });
   };
 
@@ -74,19 +102,25 @@ const Index = () => {
     const file = e.target.files[0];
     const reader = new FileReader();
     
+    // Update filename
+    setJsonFilename(file.name);
+    
     reader.onload = (event) => {
+      const content = event.target?.result as string;
       try {
-        const json = JSON.parse(event.target?.result as string);
+        const json = JSON.parse(content);
         setJsonData(json);
         toast({
           title: "JSON Imported",
-          description: "Your JSON data has been imported successfully.",
+          description: `File "${file.name}" has been imported successfully.`,
         });
       } catch (err) {
+        // Even if it's not valid JSON, still load the content
+        setJsonData({ _invalidContent: content });
         toast({
-          title: "Error Importing JSON",
-          description: "The file is not a valid JSON file.",
-          variant: "destructive"
+          variant: "destructive",
+          title: "Invalid JSON Format",
+          description: "The file has been imported but contains syntax errors. You can fix it in the editor.",
         });
       }
     };
@@ -100,19 +134,40 @@ const Index = () => {
     const file = e.target.files[0];
     const reader = new FileReader();
     
-    // Set document type based on file extension
+    // Set document type based on file extension and update filename
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'txt';
     setDocumentType(fileExtension);
+    setDocumentFilename(file.name);
     
     reader.onload = (event) => {
       setDocumentContent(event.target?.result as string);
       toast({
         title: "Document Imported",
-        description: "Your document has been imported successfully.",
+        description: `File "${file.name}" has been imported successfully.`,
       });
     };
     
     reader.readAsText(file);
+  };
+
+  const handleJsonFilenameChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setEditingJsonFilename(false);
+    }
+  };
+
+  const handleDocumentFilenameChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setEditingDocumentFilename(false);
+    }
+  };
+
+  const handleJsonFilenameBlur = () => {
+    setEditingJsonFilename(false);
+  };
+
+  const handleDocumentFilenameBlur = () => {
+    setEditingDocumentFilename(false);
   };
 
   // Get the appropriate icon based on document type
@@ -144,15 +199,36 @@ const Index = () => {
           <ResizablePanel defaultSize={50} minSize={30} className="transition-all duration-200">
             <div className="h-full flex flex-col">
               <div className="p-4 border-b flex justify-between items-center bg-white">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
                   <FileJson className="h-5 w-5 text-primary" />
-                  <h2 className="font-medium text-gray-700">JSON Data</h2>
+                  {!editingJsonFilename ? (
+                    <div className="flex items-center gap-1">
+                      <h2 className="font-medium text-gray-700">{jsonFilename}</h2>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6" 
+                        onClick={() => setEditingJsonFilename(true)}
+                      >
+                        <Pencil size={12} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Input
+                      ref={jsonFilenameInputRef}
+                      value={jsonFilename}
+                      onChange={(e) => setJsonFilename(e.target.value)}
+                      onKeyDown={handleJsonFilenameChange}
+                      onBlur={handleJsonFilenameBlur}
+                      className="h-8 text-sm font-medium"
+                    />
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <label htmlFor="import-json">
                     <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
                       <div className="flex items-center gap-1">
-                        <Upload className="h-4 w-4" />
+                        <Export className="h-4 w-4" />
                         <span>Import</span>
                       </div>
                     </Button>
@@ -165,7 +241,7 @@ const Index = () => {
                     className="hidden"
                   />
                   <Button size="sm" variant="outline" onClick={handleExportJson} className="flex items-center gap-1 transition-colors">
-                    <Download className="h-4 w-4" />
+                    <Import className="h-4 w-4" />
                     <span>Export</span>
                   </Button>
                 </div>
@@ -181,16 +257,36 @@ const Index = () => {
           <ResizablePanel defaultSize={50} minSize={30} className="transition-all duration-200">
             <div className="h-full flex flex-col">
               <div className="p-4 border-b flex justify-between items-center bg-white">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
                   {getDocumentIcon()}
-                  <h2 className="font-medium text-gray-700">Document Template</h2>
-                  <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-500 uppercase">{documentType}</span>
+                  {!editingDocumentFilename ? (
+                    <div className="flex items-center gap-1">
+                      <h2 className="font-medium text-gray-700">{documentFilename}</h2>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6" 
+                        onClick={() => setEditingDocumentFilename(true)}
+                      >
+                        <Pencil size={12} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Input
+                      ref={documentFilenameInputRef}
+                      value={documentFilename}
+                      onChange={(e) => setDocumentFilename(e.target.value)}
+                      onKeyDown={handleDocumentFilenameChange}
+                      onBlur={handleDocumentFilenameBlur}
+                      className="h-8 text-sm font-medium"
+                    />
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <label htmlFor="import-document">
                     <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
                       <div className="flex items-center gap-1">
-                        <Upload className="h-4 w-4" />
+                        <Export className="h-4 w-4" />
                         <span>Import</span>
                       </div>
                     </Button>
@@ -203,7 +299,7 @@ const Index = () => {
                     className="hidden"
                   />
                   <Button size="sm" variant="outline" onClick={handleExportDocument} className="flex items-center gap-1 transition-colors">
-                    <Download className="h-4 w-4" />
+                    <Import className="h-4 w-4" />
                     <span>Export</span>
                   </Button>
                 </div>

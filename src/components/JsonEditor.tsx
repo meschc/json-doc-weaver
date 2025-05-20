@@ -13,7 +13,11 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setContent(JSON.stringify(data, null, 2));
+    try {
+      setContent(JSON.stringify(data, null, 2));
+    } catch (err) {
+      console.error("Error stringifying JSON data:", err);
+    }
   }, [data]);
 
   const handleChange = (value: string) => {
@@ -25,13 +29,15 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
       setError(null);
     } catch (err) {
       setError("Invalid JSON format");
+      // Still update the content even if it's invalid
+      onChange({ ...data, _invalidContent: value });
     }
   };
 
   return (
     <div className="relative h-full">
       {error && (
-        <div className="absolute top-2 right-2 bg-destructive text-destructive-foreground px-2 py-1 rounded text-sm animate-fade-in z-10">
+        <div className="absolute top-2 right-2 bg-destructive/90 text-destructive-foreground px-3 py-1.5 rounded-md text-sm animate-fade-in z-10 backdrop-blur-sm shadow-md">
           {error}
         </div>
       )}

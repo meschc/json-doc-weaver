@@ -32,9 +32,10 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
   useEffect(() => {
     if (showPlaceholders) {
       let processed = content;
-      Object.entries(jsonData).forEach(([key, value]) => {
-        const placeholder = new RegExp(`{${key}}`, 'g');
-        processed = processed.replace(placeholder, String(value));
+      const placeholderRegex = /{([^}]+)}/g;
+      processed = processed.replace(placeholderRegex, (match, key) => {
+        const value = jsonData[key];
+        return value !== undefined ? String(value) : match;
       });
       setDisplayContent(processed);
     } else {
@@ -61,27 +62,6 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
     }
   };
 
-  // Custom styling for preview mode
-  const viewerTheme = {
-    "&": {
-      backgroundColor: "#ffffff",
-    },
-    ".cm-content": {
-      fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
-      fontSize: "14px",
-    },
-    ".cm-line": {
-      padding: "0 8px",
-      lineHeight: "1.6",
-    },
-    ".json-highlight": {
-      backgroundColor: "#E2F0FF",
-      color: "#3B82F6",
-      padding: "0 4px",
-      borderRadius: "3px",
-    },
-  };
-
   return (
     <div className="h-full relative">
       <div className="absolute top-2 right-2 z-10">
@@ -89,7 +69,7 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
           variant="ghost"
           size="icon"
           onClick={() => setShowPlaceholders(!showPlaceholders)}
-          className="bg-background/80 backdrop-blur-sm"
+          className="bg-background/80 backdrop-blur-sm shadow-sm border border-border/30 hover:bg-background/90 transition-all"
           title={showPlaceholders ? "Show original template" : "Show with values"}
         >
           {showPlaceholders ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -110,7 +90,7 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
         }}
         style={{
           fontSize: "14px",
-          fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
         }}
         className="h-full document-editor"
       />
