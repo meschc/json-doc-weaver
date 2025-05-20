@@ -33,7 +33,7 @@
     --input: 0 0% 90%;
     --ring: 0 0% 10%;
 
-    --radius: 0; /* Removed border radius */
+    --radius: 0.5rem; /* Added rounding */
   }
 
   .dark {
@@ -111,6 +111,8 @@
   line-height: 1.6;
   white-space: pre-wrap; /* Allow line breaks */
   word-wrap: break-word; /* Break words to avoid overflow */
+  width: 100%;
+  overflow-wrap: break-word; /* Ensure text wraps */
 }
 
 /* Remove line numbers for document editor */
@@ -145,6 +147,16 @@
 .document-portable .cm-scroller {
   height: 100%;
   overflow-x: hidden; /* Prevent horizontal scrolling */
+  width: 100%; /* Ensure full width */
+  max-width: 100%; /* Prevent horizontal overflow */
+}
+
+.document-portable .cm-line {
+  white-space: pre-wrap !important; /* Ensure text wraps within lines */
+  overflow-wrap: break-word !important; /* Force word wrapping */
+  word-break: break-word !important; /* Add word breaks where needed */
+  width: 100%; /* Full width for lines */
+  max-width: 100%; /* Prevent overflow */
 }
 
 /* Custom scrollbar styling */
@@ -159,7 +171,7 @@
 
 ::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.15);
-  border-radius: 0; /* No border radius */
+  border-radius: 4px; /* Slight rounding */
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -170,7 +182,7 @@
 .document-editor .cm-content span.json-highlight {
   background-color: rgba(0, 0, 0, 0.12);
   color: #000000;
-  border-radius: 0; /* No border radius */
+  border-radius: 4px; /* Add rounding to highlights */
   padding: 0 4px;
   transition: background-color 0.2s ease;
   font-weight: 500;
@@ -186,17 +198,17 @@
   animation: fade-in 0.3s cubic-bezier(0.27, 0.1, 0.25, 1) forwards;
 }
 
-/* Glass morphism effects - less rounded, more black & white */
+/* Glass morphism effects - slightly rounded, more black & white */
 .glass {
   backdrop-filter: blur(12px);
   background-color: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 0; /* No border radius */
+  border-radius: 8px; /* Add rounding */
 }
 
 .glass-card {
   background: rgba(255, 255, 255, 0.6);
-  border-radius: 0; /* No border radius */
+  border-radius: 8px; /* Add rounding */
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.05);
@@ -208,9 +220,24 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 }
 
-/* Button and control styling - black & white theme */
-button {
-  border-radius: 0 !important;
+/* Button and input styling - add rounding */
+button, 
+.rounded-md, 
+.toast, 
+input {
+  border-radius: 0.5rem !important;
+}
+
+/* Fluid transitions */
+.transition-colors,
+.transition-all,
+.hover\:bg-black\/40, 
+.hover\:bg-black\/20,
+.hover\:text-gray-900,
+.data-\[state\=active\]\:bg-gray-100 {
+  transition-property: all;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Mobile layout styles */

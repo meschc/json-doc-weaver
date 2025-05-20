@@ -72,6 +72,10 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
           autocompletion: true,
           foldGutter: true,
         }}
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
       />
     </div>
   );

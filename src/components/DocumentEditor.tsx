@@ -16,6 +16,7 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
   const [showPlaceholders, setShowPlaceholders] = useState(false); // Start with edit mode
   const [fileType, setFileType] = useState<"markdown" | "html" | "text">("markdown");
   const [displayContent, setDisplayContent] = useState(content);
+  const [isEditing, setIsEditing] = useState(true);
   
   // Detect file type from content
   useEffect(() => {
@@ -38,10 +39,19 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
         return value !== undefined ? String(value) : match;
       });
       setDisplayContent(processed);
+      setIsEditing(false); // When showing placeholders, we're in view mode
     } else {
       setDisplayContent(content);
+      setIsEditing(true); // When not showing placeholders, we're in edit mode
     }
   }, [content, jsonData, showPlaceholders]);
+
+  // Handle attempts to edit in view mode
+  const handleEditorClick = () => {
+    if (!isEditing) {
+      setShowPlaceholders(false);
+    }
+  };
 
   // Auto-switch to edit mode when user starts typing
   const handleChange = (value: string) => {
@@ -72,35 +82,42 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
           variant="ghost"
           size="icon"
           onClick={() => setShowPlaceholders(!showPlaceholders)}
-          className="bg-black/10 backdrop-blur-sm shadow-sm border border-border/30 hover:bg-black/20 transition-all"
+          className="bg-black/20 backdrop-blur-sm shadow-sm border border-border/30 hover:bg-black/40 transition-all rounded-full"
           title={showPlaceholders ? "Show original template" : "Show with values"}
         >
-          {showPlaceholders ? <EyeOff size={16} className="text-black" /> : <Eye size={16} className="text-black" />}
+          {showPlaceholders ? 
+            <EyeOff size={16} className="text-white" /> : 
+            <Eye size={16} className="text-black font-bold" />
+          }
         </Button>
       </div>
       
-      <CodeMirror
-        value={displayContent}
-        height="100%"
-        width="100%"
-        extensions={[getLanguageExtension()]}
-        onChange={handleChange}
-        theme="light"
-        basicSetup={{
-          lineNumbers: false,
-          highlightActiveLine: false,
-          foldGutter: true,
-          autocompletion: true,
-        }}
-        style={{
-          fontSize: "14px",
-          fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
-          width: "100%", // Ensure it fills container width
-          overflowWrap: "break-word", // Break words to prevent horizontal scrolling
-          whiteSpace: "pre-wrap", // Preserve line breaks but wrap text
-        }}
-        className="h-full document-editor document-portable"
-      />
+      <div 
+        className="h-full w-full"
+        onClick={handleEditorClick}
+      >
+        <CodeMirror
+          value={displayContent}
+          height="100%"
+          width="100%"
+          extensions={[getLanguageExtension()]}
+          onChange={handleChange}
+          theme="light"
+          editable={isEditing}
+          basicSetup={{
+            lineNumbers: false,
+            highlightActiveLine: isEditing,
+            foldGutter: true,
+            autocompletion: isEditing,
+          }}
+          style={{
+            fontSize: "14px",
+            fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
+            width: "100%", // Ensure it fills container width
+          }}
+          className="h-full document-editor document-portable"
+        />
+      </div>
     </div>
   );
 };
