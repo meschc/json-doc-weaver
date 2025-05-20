@@ -1,23 +1,24 @@
-
 import { useState, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { html } from "@codemirror/lang-html";
 import { markdown } from "@codemirror/lang-markdown";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 interface DocumentEditorProps {
   content: string;
   onChange: (content: string) => void;
   jsonData: Record<string, any>;
 }
-
-const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) => {
+const DocumentEditor = ({
+  content,
+  onChange,
+  jsonData
+}: DocumentEditorProps) => {
   const [showPlaceholders, setShowPlaceholders] = useState(false); // Start with edit mode
   const [fileType, setFileType] = useState<"markdown" | "html" | "text">("markdown");
   const [displayContent, setDisplayContent] = useState(content);
   const [isEditing, setIsEditing] = useState(true);
-  
+
   // Detect file type from content
   useEffect(() => {
     if (content.includes("<!DOCTYPE html>") || content.includes("<html")) {
@@ -74,52 +75,25 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
         return [];
     }
   };
-
-  return (
-    <div className="h-full relative">
+  return <div className="h-full relative">
       <div className="absolute top-2 right-2 z-10">
-        <Button 
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowPlaceholders(!showPlaceholders)}
-          className="bg-black/20 backdrop-blur-sm shadow-sm border border-border/30 hover:bg-black/40 transition-all rounded-full"
-          title={showPlaceholders ? "Show original template" : "Show with values"}
-        >
-          {showPlaceholders ? 
-            <EyeOff size={16} className="text-white" /> : 
-            <Eye size={16} className="text-black font-bold" />
-          }
+        <Button variant="ghost" size="icon" onClick={() => setShowPlaceholders(!showPlaceholders)} title={showPlaceholders ? "Show original template" : "Show with values"} className="backdrop-blur-sm shadow-sm border border-border/30 transition-all rounded-full bg-editor-json mx-0 text-base font-normal">
+          {showPlaceholders ? <EyeOff size={16} className="text-white" /> : <Eye size={16} className="text-black font-bold" />}
         </Button>
       </div>
       
-      <div 
-        className="h-full w-full"
-        onClick={handleEditorClick}
-      >
-        <CodeMirror
-          value={displayContent}
-          height="100%"
-          width="100%"
-          extensions={[getLanguageExtension()]}
-          onChange={handleChange}
-          theme="light"
-          editable={isEditing}
-          basicSetup={{
-            lineNumbers: false,
-            highlightActiveLine: isEditing,
-            foldGutter: true,
-            autocompletion: isEditing,
-          }}
-          style={{
-            fontSize: "14px",
-            fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
-            width: "100%", // Ensure it fills container width
-          }}
-          className="h-full document-editor document-portable"
-        />
+      <div className="h-full w-full" onClick={handleEditorClick}>
+        <CodeMirror value={displayContent} height="100%" width="100%" extensions={[getLanguageExtension()]} onChange={handleChange} theme="light" editable={isEditing} basicSetup={{
+        lineNumbers: false,
+        highlightActiveLine: isEditing,
+        foldGutter: true,
+        autocompletion: isEditing
+      }} style={{
+        fontSize: "14px",
+        fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
+        width: "100%" // Ensure it fills container width
+      }} className="h-full document-editor document-portable" />
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DocumentEditor;
