@@ -1,11 +1,10 @@
-
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@/components/ui/use-toast";
 import JsonEditor from "@/components/JsonEditor";
 import DocumentEditor from "@/components/DocumentEditor";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { FileJson, FileText, Import, Export, FileCode, Pencil } from "lucide-react";
+import { FileJson, FileText, FileCode, Pencil, Download, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const Index = () => {
@@ -228,7 +227,7 @@ const Index = () => {
                   <label htmlFor="import-json">
                     <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
                       <div className="flex items-center gap-1">
-                        <Export className="h-4 w-4" />
+                        <Upload className="h-4 w-4" />
                         <span>Import</span>
                       </div>
                     </Button>
@@ -241,7 +240,7 @@ const Index = () => {
                     className="hidden"
                   />
                   <Button size="sm" variant="outline" onClick={handleExportJson} className="flex items-center gap-1 transition-colors">
-                    <Import className="h-4 w-4" />
+                    <Download className="h-4 w-4" />
                     <span>Export</span>
                   </Button>
                 </div>
@@ -286,7 +285,7 @@ const Index = () => {
                   <label htmlFor="import-document">
                     <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
                       <div className="flex items-center gap-1">
-                        <Export className="h-4 w-4" />
+                        <Upload className="h-4 w-4" />
                         <span>Import</span>
                       </div>
                     </Button>
@@ -299,7 +298,7 @@ const Index = () => {
                     className="hidden"
                   />
                   <Button size="sm" variant="outline" onClick={handleExportDocument} className="flex items-center gap-1 transition-colors">
-                    <Import className="h-4 w-4" />
+                    <Download className="h-4 w-4" />
                     <span>Export</span>
                   </Button>
                 </div>
