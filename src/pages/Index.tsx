@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { FileJson, FileText, FileCode, Pencil, Upload, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
+  const isMobile = useMobile();
   const [jsonData, setJsonData] = useState<Record<string, any>>({
     name: "Kir",
     company: "Acme Inc.",
@@ -22,9 +25,9 @@ const Index = () => {
 
   const [documentType, setDocumentType] = useState<string>("txt");
   const [jsonFilename, setJsonFilename] = useState<string>("data");
-  const [jsonExtension, setJsonExtension] = useState<string>(".json");
+  const [jsonExtension] = useState<string>(".json");
   const [documentFilename, setDocumentFilename] = useState<string>("document");
-  const [documentExtension, setDocumentExtension] = useState<string>(".txt");
+  const [documentExtension] = useState<string>(".txt");
   const [editingJsonFilename, setEditingJsonFilename] = useState<boolean>(false);
   const [editingDocumentFilename, setEditingDocumentFilename] = useState<boolean>(false);
 
@@ -110,7 +113,7 @@ const Index = () => {
     const name = parts.join('.');
     
     setJsonFilename(name);
-    setJsonExtension(extension);
+    // Note: we don't update jsonExtension as per requirements
     
     reader.onload = (event) => {
       const content = event.target?.result as string;
@@ -150,7 +153,7 @@ const Index = () => {
     const fileExtension = extension.toLowerCase().substring(1);
     setDocumentType(fileExtension);
     setDocumentFilename(name);
-    setDocumentExtension(extension);
+    // Note: we don't update documentExtension as per requirements
     
     reader.onload = (event) => {
       setDocumentContent(event.target?.result as string);
@@ -196,6 +199,153 @@ const Index = () => {
     }
   };
 
+  const renderJsonHeader = () => (
+    <div className="p-4 border-b flex justify-between items-center bg-white">
+      <div className="flex items-center gap-2 flex-1">
+        <FileJson className="h-5 w-5 text-primary" />
+        {!editingJsonFilename ? (
+          <div className="flex items-center gap-1">
+            <h2 className="font-medium text-gray-700">{jsonFilename}{jsonExtension}</h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={() => setEditingJsonFilename(true)}
+            >
+              <Pencil size={12} />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            <Input
+              ref={jsonFilenameInputRef}
+              value={jsonFilename}
+              onChange={(e) => setJsonFilename(e.target.value)}
+              onKeyDown={handleJsonFilenameChange}
+              onBlur={handleJsonFilenameBlur}
+              className="h-8 text-sm font-medium"
+            />
+            <span className="text-gray-500">{jsonExtension}</span>
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <label htmlFor="import-json">
+          <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
+            <div className="flex items-center gap-1">
+              <Download className="h-4 w-4" />
+              <span>Import</span>
+            </div>
+          </Button>
+        </label>
+        <input
+          id="import-json"
+          type="file"
+          accept=".json"
+          onChange={handleImportJson}
+          className="hidden"
+        />
+        <Button size="sm" variant="outline" onClick={handleExportJson} className="flex items-center gap-1 transition-colors">
+          <Upload className="h-4 w-4" />
+          <span>Export</span>
+        </Button>
+      </div>
+    </div>
+  );
+
+  const renderDocumentHeader = () => (
+    <div className="p-4 border-b flex justify-between items-center bg-white">
+      <div className="flex items-center gap-2 flex-1">
+        {getDocumentIcon()}
+        {!editingDocumentFilename ? (
+          <div className="flex items-center gap-1">
+            <h2 className="font-medium text-gray-700">{documentFilename}{documentExtension}</h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-6 w-6" 
+              onClick={() => setEditingDocumentFilename(true)}
+            >
+              <Pencil size={12} />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1">
+            <Input
+              ref={documentFilenameInputRef}
+              value={documentFilename}
+              onChange={(e) => setDocumentFilename(e.target.value)}
+              onKeyDown={handleDocumentFilenameChange}
+              onBlur={handleDocumentFilenameBlur}
+              className="h-8 text-sm font-medium"
+            />
+            <span className="text-gray-500">{documentExtension}</span>
+          </div>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <label htmlFor="import-document">
+          <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
+            <div className="flex items-center gap-1">
+              <Download className="h-4 w-4" />
+              <span>Import</span>
+            </div>
+          </Button>
+        </label>
+        <input
+          id="import-document"
+          type="file"
+          accept=".txt,.md,.html,.doc,.docx"
+          onChange={handleImportDocument}
+          className="hidden"
+        />
+        <Button size="sm" variant="outline" onClick={handleExportDocument} className="flex items-center gap-1 transition-colors">
+          <Upload className="h-4 w-4" />
+          <span>Export</span>
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col h-screen bg-gray-50">
+        <header className="border-b py-3 px-4 bg-white flex items-center justify-between shadow-sm">
+          <h1 className="text-lg font-medium flex items-center gap-2 text-gray-800">
+            JSON Document Editor
+          </h1>
+        </header>
+
+        <main className="flex-1 overflow-hidden">
+          <Tabs defaultValue="json" className="h-full flex flex-col">
+            <TabsList className="w-full justify-center border-b bg-white rounded-none">
+              <TabsTrigger value="json" className="flex-1">JSON</TabsTrigger>
+              <TabsTrigger value="document" className="flex-1">Document</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="json" className="flex-1 overflow-hidden m-0 p-0 h-full data-[state=inactive]:hidden data-[state=active]:flex data-[state=active]:flex-col">
+              {renderJsonHeader()}
+              <div className="flex-1 overflow-hidden bg-white">
+                <JsonEditor data={jsonData} onChange={setJsonData} />
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="document" className="flex-1 overflow-hidden m-0 p-0 h-full data-[state=inactive]:hidden data-[state=active]:flex data-[state=active]:flex-col">
+              {renderDocumentHeader()}
+              <div className="flex-1 overflow-hidden bg-white">
+                <DocumentEditor 
+                  content={documentContent} 
+                  onChange={setDocumentContent} 
+                  jsonData={jsonData}
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <header className="border-b py-3 px-6 bg-white flex items-center justify-between shadow-sm">
@@ -207,61 +357,11 @@ const Index = () => {
       <main className="flex-1 overflow-hidden">
         <ResizablePanelGroup
           direction="horizontal"
-          className="h-full rounded-lg"
+          className="h-full"
         >
           <ResizablePanel defaultSize={50} minSize={30} className="transition-all duration-200">
             <div className="h-full flex flex-col">
-              <div className="p-4 border-b flex justify-between items-center bg-white">
-                <div className="flex items-center gap-2 flex-1">
-                  <FileJson className="h-5 w-5 text-primary" />
-                  {!editingJsonFilename ? (
-                    <div className="flex items-center gap-1">
-                      <h2 className="font-medium text-gray-700">{jsonFilename}{jsonExtension}</h2>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6" 
-                        onClick={() => setEditingJsonFilename(true)}
-                      >
-                        <Pencil size={12} />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <Input
-                        ref={jsonFilenameInputRef}
-                        value={jsonFilename}
-                        onChange={(e) => setJsonFilename(e.target.value)}
-                        onKeyDown={handleJsonFilenameChange}
-                        onBlur={handleJsonFilenameBlur}
-                        className="h-8 text-sm font-medium"
-                      />
-                      <span className="text-gray-500">{jsonExtension}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <label htmlFor="import-json">
-                    <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
-                      <div className="flex items-center gap-1">
-                        <Download className="h-4 w-4" />
-                        <span>Import</span>
-                      </div>
-                    </Button>
-                  </label>
-                  <input
-                    id="import-json"
-                    type="file"
-                    accept=".json"
-                    onChange={handleImportJson}
-                    className="hidden"
-                  />
-                  <Button size="sm" variant="outline" onClick={handleExportJson} className="flex items-center gap-1 transition-colors">
-                    <Upload className="h-4 w-4" />
-                    <span>Export</span>
-                  </Button>
-                </div>
-              </div>
+              {renderJsonHeader()}
               <div className="flex-1 overflow-hidden bg-white border-r">
                 <JsonEditor data={jsonData} onChange={setJsonData} />
               </div>
@@ -272,57 +372,7 @@ const Index = () => {
           
           <ResizablePanel defaultSize={50} minSize={30} className="transition-all duration-200">
             <div className="h-full flex flex-col">
-              <div className="p-4 border-b flex justify-between items-center bg-white">
-                <div className="flex items-center gap-2 flex-1">
-                  {getDocumentIcon()}
-                  {!editingDocumentFilename ? (
-                    <div className="flex items-center gap-1">
-                      <h2 className="font-medium text-gray-700">{documentFilename}{documentExtension}</h2>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6" 
-                        onClick={() => setEditingDocumentFilename(true)}
-                      >
-                        <Pencil size={12} />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <Input
-                        ref={documentFilenameInputRef}
-                        value={documentFilename}
-                        onChange={(e) => setDocumentFilename(e.target.value)}
-                        onKeyDown={handleDocumentFilenameChange}
-                        onBlur={handleDocumentFilenameBlur}
-                        className="h-8 text-sm font-medium"
-                      />
-                      <span className="text-gray-500">{documentExtension}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <label htmlFor="import-document">
-                    <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
-                      <div className="flex items-center gap-1">
-                        <Download className="h-4 w-4" />
-                        <span>Import</span>
-                      </div>
-                    </Button>
-                  </label>
-                  <input
-                    id="import-document"
-                    type="file"
-                    accept=".txt,.md,.html,.doc,.docx"
-                    onChange={handleImportDocument}
-                    className="hidden"
-                  />
-                  <Button size="sm" variant="outline" onClick={handleExportDocument} className="flex items-center gap-1 transition-colors">
-                    <Upload className="h-4 w-4" />
-                    <span>Export</span>
-                  </Button>
-                </div>
-              </div>
+              {renderDocumentHeader()}
               <div className="flex-1 overflow-hidden bg-white">
                 <DocumentEditor 
                   content={documentContent} 

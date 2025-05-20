@@ -90,9 +90,9 @@
   transition-duration: 300ms;
 }
 
-/* CodeMirror customization for Apple-style aesthetics */
+/* CodeMirror customization for Apple-style aesthetics - REMOVED BORDER RADIUS */
 .cm-editor {
-  border-radius: 0.6rem;
+  border-radius: 0;
   font-family: "SF Mono", SFMono-Regular, ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
   overflow: hidden;
   box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.02);
@@ -110,9 +110,33 @@
   line-height: 1.6;
 }
 
-.cm-gutters {
+/* Remove line numbers for document editor */
+.document-editor .cm-gutters {
+  display: none;
+}
+
+.document-editor .cm-content {
+  padding-left: 1rem;
+}
+
+.json-editor .cm-gutters {
   background-color: rgba(0, 0, 0, 0.02);
   border-right: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* Make document fully fit in the frame */
+.document-portable {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.document-portable .cm-editor {
+  height: 100%;
+}
+
+.document-portable .cm-scroller {
+  height: 100%;
 }
 
 /* Custom scrollbar styling */
@@ -172,4 +196,11 @@
 .glass-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Mobile layout styles */
+@media (max-width: 640px) {
+  .tabs-content {
+    height: calc(100% - 40px);
+  }
 }

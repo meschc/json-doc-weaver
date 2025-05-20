@@ -11,26 +11,43 @@ interface JsonEditorProps {
 const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [internalUpdate, setInternalUpdate] = useState(false);
 
   useEffect(() => {
-    try {
-      setContent(JSON.stringify(data, null, 2));
-    } catch (err) {
-      console.error("Error stringifying JSON data:", err);
+    // Only update content from props if not an internal update
+    if (!internalUpdate) {
+      try {
+        // If there's invalid content stored, use that instead
+        if (data._invalidContent) {
+          setContent(data._invalidContent);
+        } else {
+          setContent(JSON.stringify(data, null, 2));
+        }
+      } catch (err) {
+        console.error("Error stringifying JSON data:", err);
+      }
     }
-  }, [data]);
+    setInternalUpdate(false);
+  }, [data, internalUpdate]);
 
   const handleChange = (value: string) => {
     setContent(value);
+    setInternalUpdate(true);
     
     try {
       const parsed = JSON.parse(value);
       onChange(parsed);
       setError(null);
     } catch (err) {
-      setError("Invalid JSON format");
+      // Only show error when user stops typing for a bit
+      const timer = setTimeout(() => {
+        setError("Invalid JSON format");
+      }, 1000);
+      
       // Still update the content even if it's invalid
       onChange({ ...data, _invalidContent: value });
+      
+      return () => clearTimeout(timer);
     }
   };
 
@@ -47,7 +64,7 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
         extensions={[json()]}
         onChange={handleChange}
         theme="light"
-        className="h-full"
+        className="h-full json-editor"
         basicSetup={{
           lineNumbers: true,
           highlightActiveLine: true,

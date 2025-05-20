@@ -28,7 +28,7 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
     }
   }, [content]);
 
-  // Process content with placeholders
+  // Process content with placeholders - Fixed to replace ALL placeholders
   useEffect(() => {
     if (showPlaceholders) {
       let processed = content;
@@ -92,7 +92,7 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
           fontSize: "14px",
           fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
         }}
-        className="h-full document-editor"
+        className="h-full document-editor document-portable"
       />
     </div>
   );
