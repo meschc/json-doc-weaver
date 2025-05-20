@@ -5,10 +5,11 @@ import JsonEditor from "@/components/JsonEditor";
 import DocumentEditor from "@/components/DocumentEditor";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { FileJson, FileText, FileCode, Pencil, Upload, Download } from "lucide-react";
+import { FileJson, FileText, FileCode, Pencil, Upload, Download, HelpCircle, Link } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMobile } from "@/hooks/use-mobile";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Index = () => {
   const isMobile = useMobile();
@@ -202,10 +203,10 @@ const Index = () => {
   const renderJsonHeader = () => (
     <div className="p-4 border-b flex justify-between items-center bg-white">
       <div className="flex items-center gap-2 flex-1">
-        <FileJson className="h-5 w-5 text-primary" />
+        <FileJson className="h-5 w-5 text-black" />
         {!editingJsonFilename ? (
           <div className="flex items-center gap-1">
-            <h2 className="font-medium text-gray-700">{jsonFilename}{jsonExtension}</h2>
+            <h2 className="font-medium text-gray-800">{jsonFilename}{jsonExtension}</h2>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -259,7 +260,7 @@ const Index = () => {
         {getDocumentIcon()}
         {!editingDocumentFilename ? (
           <div className="flex items-center gap-1">
-            <h2 className="font-medium text-gray-700">{documentFilename}{documentExtension}</h2>
+            <h2 className="font-medium text-gray-800">{documentFilename}{documentExtension}</h2>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -309,11 +310,32 @@ const Index = () => {
 
   if (isMobile) {
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
+      <div className="flex flex-col h-screen bg-white">
         <header className="border-b py-3 px-4 bg-white flex items-center justify-between shadow-sm">
-          <h1 className="text-lg font-medium flex items-center gap-2 text-gray-800">
-            JSON Document Editor
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-medium flex items-center gap-2 text-gray-800">
+              JSON Document Editor
+            </h1>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <HelpCircle className="h-4 w-4 text-gray-500" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <p className="text-sm">
+                    This editor allows you to create document templates with placeholders {"{like this}"} 
+                    that will be replaced with values from your JSON. Toggle the eye icon to preview.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+          <a href="https://kirmesch.ru" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+            <span>Kirill Meshcheryakov</span>
+            <Link className="h-3 w-3" />
+          </a>
         </header>
 
         <main className="flex-1 overflow-hidden">
@@ -342,16 +364,76 @@ const Index = () => {
             </TabsContent>
           </Tabs>
         </main>
+        
+        {/* Mobile bottom action buttons */}
+        <div className="border-t py-3 px-4 bg-white flex justify-center space-x-4">
+          <div className="flex gap-2">
+            <label htmlFor="import-mobile">
+              <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
+                <div className="flex items-center gap-1">
+                  <Download className="h-4 w-4" />
+                  <span>Import</span>
+                </div>
+              </Button>
+            </label>
+            <input
+              id="import-mobile"
+              type="file"
+              accept=".json,.txt,.md,.html,.doc,.docx"
+              onChange={(e) => {
+                const fileName = e.target.files?.[0]?.name || '';
+                if (fileName.endsWith('.json')) {
+                  handleImportJson(e);
+                } else {
+                  handleImportDocument(e);
+                }
+              }}
+              className="hidden"
+            />
+            <Button size="sm" variant="outline" onClick={() => {
+              const activeTab = document.querySelector('[data-state="active"]')?.getAttribute('value');
+              if (activeTab === 'json') {
+                handleExportJson();
+              } else {
+                handleExportDocument();
+              }
+            }} className="flex items-center gap-1 transition-colors">
+              <Upload className="h-4 w-4" />
+              <span>Export</span>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-white">
       <header className="border-b py-3 px-6 bg-white flex items-center justify-between shadow-sm">
-        <h1 className="text-xl font-medium flex items-center gap-2 text-gray-800">
-          JSON Document Editor
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-medium flex items-center gap-2 text-gray-800">
+            JSON Document Editor
+          </h1>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <HelpCircle className="h-4 w-4 text-gray-500" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                <p className="text-sm">
+                  This editor allows you to create document templates with placeholders {"{like this}"} 
+                  that will be replaced with values from your JSON data. Toggle the eye icon to preview.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        <a href="https://kirmesch.ru" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+          <span>Kirill Meshcheryakov</span>
+          <Link className="h-3 w-3" />
+        </a>
       </header>
 
       <main className="flex-1 overflow-hidden">
@@ -368,7 +450,7 @@ const Index = () => {
             </div>
           </ResizablePanel>
           
-          <ResizableHandle className="w-2 bg-gray-100 hover:bg-primary/20 transition-colors" />
+          <ResizableHandle className="w-2 bg-gray-100 hover:bg-black/10 transition-colors" />
           
           <ResizablePanel defaultSize={50} minSize={30} className="transition-all duration-200">
             <div className="h-full flex flex-col">

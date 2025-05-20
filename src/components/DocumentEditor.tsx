@@ -13,7 +13,7 @@ interface DocumentEditorProps {
 }
 
 const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) => {
-  const [showPlaceholders, setShowPlaceholders] = useState(true);
+  const [showPlaceholders, setShowPlaceholders] = useState(false); // Start with edit mode
   const [fileType, setFileType] = useState<"markdown" | "html" | "text">("markdown");
   const [displayContent, setDisplayContent] = useState(content);
   
@@ -43,9 +43,12 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
     }
   }, [content, jsonData, showPlaceholders]);
 
+  // Auto-switch to edit mode when user starts typing
   const handleChange = (value: string) => {
     onChange(value);
-    if (!showPlaceholders) {
+    if (showPlaceholders) {
+      setShowPlaceholders(false);
+    } else {
       setDisplayContent(value);
     }
   };
@@ -69,16 +72,17 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
           variant="ghost"
           size="icon"
           onClick={() => setShowPlaceholders(!showPlaceholders)}
-          className="bg-background/80 backdrop-blur-sm shadow-sm border border-border/30 hover:bg-background/90 transition-all"
+          className="bg-black/10 backdrop-blur-sm shadow-sm border border-border/30 hover:bg-black/20 transition-all"
           title={showPlaceholders ? "Show original template" : "Show with values"}
         >
-          {showPlaceholders ? <EyeOff size={16} /> : <Eye size={16} />}
+          {showPlaceholders ? <EyeOff size={16} className="text-black" /> : <Eye size={16} className="text-black" />}
         </Button>
       </div>
       
       <CodeMirror
         value={displayContent}
         height="100%"
+        width="100%"
         extensions={[getLanguageExtension()]}
         onChange={handleChange}
         theme="light"
@@ -91,6 +95,9 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
         style={{
           fontSize: "14px",
           fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
+          width: "100%", // Ensure it fills container width
+          overflowWrap: "break-word", // Break words to prevent horizontal scrolling
+          whiteSpace: "pre-wrap", // Preserve line breaks but wrap text
         }}
         className="h-full document-editor document-portable"
       />
