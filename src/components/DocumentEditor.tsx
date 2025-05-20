@@ -83,8 +83,8 @@ const DocumentEditor = ({ content, onChange, jsonData }: DocumentEditorProps) =>
         onChange={handleChange}
         theme="light"
         basicSetup={{
-          lineNumbers: true,
-          highlightActiveLine: true,
+          lineNumbers: false,
+          highlightActiveLine: false,
           foldGutter: true,
           autocompletion: true,
         }}

@@ -1,10 +1,11 @@
+
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@/components/ui/use-toast";
 import JsonEditor from "@/components/JsonEditor";
 import DocumentEditor from "@/components/DocumentEditor";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { FileJson, FileText, FileCode, Pencil, Download, Upload } from "lucide-react";
+import { FileJson, FileText, FileCode, Pencil, Upload, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 const Index = () => {
@@ -20,8 +21,10 @@ const Index = () => {
   );
 
   const [documentType, setDocumentType] = useState<string>("txt");
-  const [jsonFilename, setJsonFilename] = useState<string>("data.json");
-  const [documentFilename, setDocumentFilename] = useState<string>("document.txt");
+  const [jsonFilename, setJsonFilename] = useState<string>("data");
+  const [jsonExtension, setJsonExtension] = useState<string>(".json");
+  const [documentFilename, setDocumentFilename] = useState<string>("document");
+  const [documentExtension, setDocumentExtension] = useState<string>(".txt");
   const [editingJsonFilename, setEditingJsonFilename] = useState<boolean>(false);
   const [editingDocumentFilename, setEditingDocumentFilename] = useState<boolean>(false);
 
@@ -54,13 +57,13 @@ const Index = () => {
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = jsonFilename;
+    link.download = jsonFilename + jsonExtension;
     link.click();
     
     URL.revokeObjectURL(url);
     toast({
       title: "JSON Exported",
-      description: `File "${jsonFilename}" has been exported successfully.`,
+      description: `File "${jsonFilename + jsonExtension}" has been exported successfully.`,
     });
   };
 
@@ -85,13 +88,13 @@ const Index = () => {
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = documentFilename;
+    link.download = documentFilename + documentExtension;
     link.click();
     
     URL.revokeObjectURL(url);
     toast({
       title: "Document Exported",
-      description: `File "${documentFilename}" has been exported successfully.`,
+      description: `File "${documentFilename + documentExtension}" has been exported successfully.`,
     });
   };
 
@@ -101,8 +104,13 @@ const Index = () => {
     const file = e.target.files[0];
     const reader = new FileReader();
     
-    // Update filename
-    setJsonFilename(file.name);
+    // Update filename and extension
+    const parts = file.name.split('.');
+    const extension = parts.length > 1 ? `.${parts.pop()}` : ".json";
+    const name = parts.join('.');
+    
+    setJsonFilename(name);
+    setJsonExtension(extension);
     
     reader.onload = (event) => {
       const content = event.target?.result as string;
@@ -133,10 +141,16 @@ const Index = () => {
     const file = e.target.files[0];
     const reader = new FileReader();
     
-    // Set document type based on file extension and update filename
-    const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'txt';
+    // Split filename and extension
+    const parts = file.name.split('.');
+    const extension = parts.length > 1 ? `.${parts.pop()}` : ".txt";
+    const name = parts.join('.');
+    
+    // Set document type based on file extension
+    const fileExtension = extension.toLowerCase().substring(1);
     setDocumentType(fileExtension);
-    setDocumentFilename(file.name);
+    setDocumentFilename(name);
+    setDocumentExtension(extension);
     
     reader.onload = (event) => {
       setDocumentContent(event.target?.result as string);
@@ -202,7 +216,7 @@ const Index = () => {
                   <FileJson className="h-5 w-5 text-primary" />
                   {!editingJsonFilename ? (
                     <div className="flex items-center gap-1">
-                      <h2 className="font-medium text-gray-700">{jsonFilename}</h2>
+                      <h2 className="font-medium text-gray-700">{jsonFilename}{jsonExtension}</h2>
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -213,21 +227,24 @@ const Index = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Input
-                      ref={jsonFilenameInputRef}
-                      value={jsonFilename}
-                      onChange={(e) => setJsonFilename(e.target.value)}
-                      onKeyDown={handleJsonFilenameChange}
-                      onBlur={handleJsonFilenameBlur}
-                      className="h-8 text-sm font-medium"
-                    />
+                    <div className="flex items-center gap-1">
+                      <Input
+                        ref={jsonFilenameInputRef}
+                        value={jsonFilename}
+                        onChange={(e) => setJsonFilename(e.target.value)}
+                        onKeyDown={handleJsonFilenameChange}
+                        onBlur={handleJsonFilenameBlur}
+                        className="h-8 text-sm font-medium"
+                      />
+                      <span className="text-gray-500">{jsonExtension}</span>
+                    </div>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <label htmlFor="import-json">
                     <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
                       <div className="flex items-center gap-1">
-                        <Upload className="h-4 w-4" />
+                        <Download className="h-4 w-4" />
                         <span>Import</span>
                       </div>
                     </Button>
@@ -240,7 +257,7 @@ const Index = () => {
                     className="hidden"
                   />
                   <Button size="sm" variant="outline" onClick={handleExportJson} className="flex items-center gap-1 transition-colors">
-                    <Download className="h-4 w-4" />
+                    <Upload className="h-4 w-4" />
                     <span>Export</span>
                   </Button>
                 </div>
@@ -260,7 +277,7 @@ const Index = () => {
                   {getDocumentIcon()}
                   {!editingDocumentFilename ? (
                     <div className="flex items-center gap-1">
-                      <h2 className="font-medium text-gray-700">{documentFilename}</h2>
+                      <h2 className="font-medium text-gray-700">{documentFilename}{documentExtension}</h2>
                       <Button 
                         variant="ghost" 
                         size="icon" 
@@ -271,21 +288,24 @@ const Index = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Input
-                      ref={documentFilenameInputRef}
-                      value={documentFilename}
-                      onChange={(e) => setDocumentFilename(e.target.value)}
-                      onKeyDown={handleDocumentFilenameChange}
-                      onBlur={handleDocumentFilenameBlur}
-                      className="h-8 text-sm font-medium"
-                    />
+                    <div className="flex items-center gap-1">
+                      <Input
+                        ref={documentFilenameInputRef}
+                        value={documentFilename}
+                        onChange={(e) => setDocumentFilename(e.target.value)}
+                        onKeyDown={handleDocumentFilenameChange}
+                        onBlur={handleDocumentFilenameBlur}
+                        className="h-8 text-sm font-medium"
+                      />
+                      <span className="text-gray-500">{documentExtension}</span>
+                    </div>
                   )}
                 </div>
                 <div className="flex gap-2">
                   <label htmlFor="import-document">
                     <Button variant="outline" size="sm" className="cursor-pointer transition-colors" asChild>
                       <div className="flex items-center gap-1">
-                        <Upload className="h-4 w-4" />
+                        <Download className="h-4 w-4" />
                         <span>Import</span>
                       </div>
                     </Button>
@@ -298,7 +318,7 @@ const Index = () => {
                     className="hidden"
                   />
                   <Button size="sm" variant="outline" onClick={handleExportDocument} className="flex items-center gap-1 transition-colors">
-                    <Download className="h-4 w-4" />
+                    <Upload className="h-4 w-4" />
                     <span>Export</span>
                   </Button>
                 </div>
