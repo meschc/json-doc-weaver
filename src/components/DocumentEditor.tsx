@@ -77,7 +77,7 @@ const DocumentEditor = ({
   };
   return <div className="h-full relative">
       <div className="absolute top-2 right-2 z-10">
-        <Button variant="ghost" size="icon" onClick={() => setShowPlaceholders(!showPlaceholders)} title={showPlaceholders ? "Show original template" : "Show with values"} className="backdrop-blur-sm shadow-sm border border-border/30 transition-all rounded-full bg-editor-json mx-0 text-base font-normal">
+        <Button variant="ghost" size="icon" onClick={() => setShowPlaceholders(!showPlaceholders)} title={showPlaceholders ? "Show original template" : "Show with values"} className="backdrop-blur-sm shadow-sm border border-border/30 transition-all rounded-full mx-0 text-base font-normal bg-zinc-50">
           {showPlaceholders ? <EyeOff size={16} className="text-white" /> : <Eye size={16} className="text-black font-bold" />}
         </Button>
       </div>
