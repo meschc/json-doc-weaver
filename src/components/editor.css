@@ -4,6 +4,15 @@
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+.document-editor .cm-line,
+.json-editor .cm-line {
+  white-space: pre-wrap !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  max-width: 100%;
 }
 
 .dark .document-editor,
