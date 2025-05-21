@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
@@ -14,20 +15,21 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
   const [internalUpdate, setInternalUpdate] = useState(false);
 
   useEffect(() => {
-    // Only update content from props if not an internal update
-    if (!internalUpdate) {
-      try {
+    try {
+      // Only update content from props if not an internal update
+      if (!internalUpdate) {
         // If there's invalid content stored, use that instead
         if (data._invalidContent) {
           setContent(data._invalidContent);
         } else {
           setContent(JSON.stringify(data, null, 2));
         }
-      } catch (err) {
-        console.error("Error stringifying JSON data:", err);
       }
+      setInternalUpdate(false);
+    } catch (err) {
+      console.error("Error stringifying JSON data:", err);
+      setError("Error processing JSON data");
     }
-    setInternalUpdate(false);
   }, [data, internalUpdate]);
 
   const handleChange = (value: string) => {

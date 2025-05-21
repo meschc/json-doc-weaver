@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { html } from "@codemirror/lang-html";
@@ -21,34 +22,52 @@ const DocumentEditor = ({
   const [fileType, setFileType] = useState<"markdown" | "html" | "text" | "pdf">("markdown");
   const [displayContent, setDisplayContent] = useState(content);
   const [isEditing, setIsEditing] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Error handling function
+  const handleEditorError = (err: any) => {
+    console.error("Document editor error:", err);
+    setError("Error in document editor");
+    // Continue with default content
+    setDisplayContent(content);
+  };
 
   // Detect file type from content
   useEffect(() => {
-    if (content.includes("<!DOCTYPE html>") || content.includes("<html")) {
-      setFileType("html");
-    } else if (content.includes("#") || content.includes("**")) {
-      setFileType("markdown");
-    } else if (content.includes("%PDF-")) {
-      setFileType("pdf");
-    } else {
-      setFileType("text");
+    try {
+      if (content.includes("<!DOCTYPE html>") || content.includes("<html")) {
+        setFileType("html");
+      } else if (content.includes("#") || content.includes("**")) {
+        setFileType("markdown");
+      } else if (content.includes("%PDF-")) {
+        setFileType("pdf");
+      } else {
+        setFileType("text");
+      }
+    } catch (err) {
+      handleEditorError(err);
     }
   }, [content]);
 
   // Process content with placeholders - Fixed to replace ALL placeholders
   useEffect(() => {
-    if (showPlaceholders) {
-      let processed = content;
-      const placeholderRegex = /{([^}]+)}/g;
-      processed = processed.replace(placeholderRegex, (match, key) => {
-        const value = jsonData[key];
-        return value !== undefined ? String(value) : match;
-      });
-      setDisplayContent(processed);
-      setIsEditing(false); // When showing placeholders, we're in view mode
-    } else {
-      setDisplayContent(content);
-      setIsEditing(true); // When not showing placeholders, we're in edit mode
+    try {
+      if (showPlaceholders) {
+        let processed = content;
+        const placeholderRegex = /{([^}]+)}/g;
+        processed = processed.replace(placeholderRegex, (match, key) => {
+          const value = jsonData[key];
+          return value !== undefined ? String(value) : match;
+        });
+        setDisplayContent(processed);
+        setIsEditing(false); // When showing placeholders, we're in view mode
+      } else {
+        setDisplayContent(content);
+        setIsEditing(true); // When not showing placeholders, we're in edit mode
+      }
+      setError(null);
+    } catch (err) {
+      handleEditorError(err);
     }
   }, [content, jsonData, showPlaceholders]);
 
@@ -61,11 +80,16 @@ const DocumentEditor = ({
 
   // Auto-switch to edit mode when user starts typing
   const handleChange = (value: string) => {
-    onChange(value);
-    if (showPlaceholders) {
-      setShowPlaceholders(false);
-    } else {
-      setDisplayContent(value);
+    try {
+      onChange(value);
+      if (showPlaceholders) {
+        setShowPlaceholders(false);
+      } else {
+        setDisplayContent(value);
+      }
+      setError(null);
+    } catch (err) {
+      handleEditorError(err);
     }
   };
 
@@ -83,6 +107,11 @@ const DocumentEditor = ({
 
   return (
     <div className="h-full relative">
+      {error && (
+        <div className="absolute top-2 left-2 z-20 bg-destructive text-destructive-foreground px-3 py-1.5 rounded-md text-sm">
+          {error}
+        </div>
+      )}
       <div className="absolute top-2 right-2 z-10">
         <Button 
           variant="ghost" 
@@ -113,7 +142,8 @@ const DocumentEditor = ({
           style={{
             fontSize: "14px",
             fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
-            width: "100%"
+            width: "100%",
+            height: "100%"
           }} 
           className="h-full document-editor" 
         />
