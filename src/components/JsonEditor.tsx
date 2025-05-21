@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
+import "./editor.css";
 
 interface JsonEditorProps {
   data: Record<string, any>;

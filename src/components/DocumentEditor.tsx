@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { html } from "@codemirror/lang-html";
 import { markdown } from "@codemirror/lang-markdown";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import "./editor.css";
 
 interface DocumentEditorProps {
   content: string;
@@ -113,9 +113,9 @@ const DocumentEditor = ({
           style={{
             fontSize: "14px",
             fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
-            width: "100%" // Ensure it fills container width
+            width: "100%"
           }} 
-          className="h-full document-editor document-portable" 
+          className="h-full document-editor" 
         />
       </div>
     </div>
