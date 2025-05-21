@@ -1,11 +1,10 @@
-
 import { useState, useEffect, useRef } from "react";
 import { toast } from "@/components/ui/use-toast";
 import JsonEditor from "@/components/JsonEditor";
 import DocumentEditor from "@/components/DocumentEditor";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { FileJson, FileText, FileCode, FilePdf, Pencil, Upload, Download, HelpCircle, Link } from "lucide-react";
+import { FileJson, FileText, FileCode, File, Download, Upload, HelpCircle, Link, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMobile } from "@/hooks/use-mobile";
@@ -247,7 +246,7 @@ const Index = () => {
       case 'html':
         return <FileCode className="h-5 w-5 text-primary" />;
       case 'pdf':
-        return <FilePdf className="h-5 w-5 text-primary" />;
+        return <File className="h-5 w-5 text-primary" />;
       case 'doc':
       case 'docx':
         return <FileText className="h-5 w-5 text-primary" />;
