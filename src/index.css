@@ -87,7 +87,7 @@
 .transition-all {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
-  transition-duration: 300ms;
+  transition-duration: 200ms; /* Faster transitions */
 }
 
 /* CodeMirror customization - NO BORDER RADIUS */
@@ -97,6 +97,7 @@
   overflow: hidden;
   box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.05), 0 1px 4px -1px rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: none;
   width: 100%;
 }
 
@@ -142,6 +143,7 @@
   width: 100%;
   overflow-wrap: break-word; /* Break words to avoid overflow */
   word-break: break-word; /* Break words at arbitrary points if needed */
+  max-width: 100%; /* Prevent overflow */
 }
 
 .document-portable .cm-scroller {
@@ -195,7 +197,7 @@
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s cubic-bezier(0.27, 0.1, 0.25, 1) forwards;
+  animation: fade-in 0.2s cubic-bezier(0.27, 0.1, 0.25, 1) forwards;
 }
 
 /* Glass morphism effects - slightly rounded, more black & white */
@@ -236,7 +238,7 @@ input {
 .hover\:text-gray-900,
 .data-\[state\=active\]\:bg-gray-100 {
   transition-property: all;
-  transition-duration: 300ms;
+  transition-duration: 200ms; /* Faster transitions */
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 

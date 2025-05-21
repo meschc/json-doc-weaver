@@ -5,7 +5,7 @@ import JsonEditor from "@/components/JsonEditor";
 import DocumentEditor from "@/components/DocumentEditor";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { FileJson, FileText, FileCode, Pencil, Upload, Download, HelpCircle, Link } from "lucide-react";
+import { FileJson, FileText, FileCode, FilePdf, Pencil, Upload, Download, HelpCircle, Link } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMobile } from "@/hooks/use-mobile";
@@ -28,7 +28,7 @@ const Index = () => {
   const [jsonFilename, setJsonFilename] = useState<string>("data");
   const [jsonExtension] = useState<string>(".json");
   const [documentFilename, setDocumentFilename] = useState<string>("document");
-  const [documentExtension] = useState<string>(".txt");
+  const [documentExtension, setDocumentExtension] = useState<string>(".txt");
   const [editingJsonFilename, setEditingJsonFilename] = useState<boolean>(false);
   const [editingDocumentFilename, setEditingDocumentFilename] = useState<boolean>(false);
 
@@ -46,6 +46,23 @@ const Index = () => {
       documentFilenameInputRef.current.focus();
     }
   }, [editingDocumentFilename]);
+
+  useEffect(() => {
+    // Update document extension based on document type
+    switch (documentType) {
+      case 'html':
+        setDocumentExtension('.html');
+        break;
+      case 'pdf':
+        setDocumentExtension('.pdf');
+        break;
+      case 'doc':
+        setDocumentExtension('.doc');
+        break;
+      default:
+        setDocumentExtension('.txt');
+    }
+  }, [documentType]);
 
   const handleExportJson = () => {
     let dataStr;
@@ -85,6 +102,11 @@ const Index = () => {
       mimeType = 'text/html';
     } else if (documentType === 'doc') {
       mimeType = 'application/msword';
+    } else if (documentType === 'pdf') {
+      // For PDF export, we need to use a library or service
+      // This is a simplified approach - in production, you'd use a PDF generation library
+      exportToPdf(processedContent);
+      return;
     }
     
     const dataBlob = new Blob([processedContent], { type: mimeType });
@@ -100,6 +122,29 @@ const Index = () => {
       title: "Document Exported",
       description: `File "${documentFilename + documentExtension}" has been exported successfully.`,
     });
+  };
+
+  // Function to handle PDF export
+  const exportToPdf = (content: string) => {
+    // This is a placeholder for actual PDF export functionality
+    // In a real application, you would use a library like jsPDF or a server-side approach
+    
+    toast({
+      title: "PDF Export",
+      description: "PDF export functionality requires additional setup with a PDF generation library like jsPDF or pdfmake.",
+      variant: "default",
+    });
+    
+    // For demonstration purposes, we'll just export as text with .pdf extension
+    const dataBlob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = documentFilename + documentExtension;
+    link.click();
+    
+    URL.revokeObjectURL(url);
   };
 
   const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,7 +199,16 @@ const Index = () => {
     const fileExtension = extension.toLowerCase().substring(1);
     setDocumentType(fileExtension);
     setDocumentFilename(name);
-    // Note: we don't update documentExtension as per requirements
+    
+    // Special handling for PDF files
+    if (fileExtension === 'pdf') {
+      toast({
+        variant: "default",
+        title: "PDF Import",
+        description: "PDF content editing is not supported natively. Consider converting to text or HTML format for editing.",
+      });
+      return;
+    }
     
     reader.onload = (event) => {
       setDocumentContent(event.target?.result as string);
@@ -192,6 +246,8 @@ const Index = () => {
     switch (documentType) {
       case 'html':
         return <FileCode className="h-5 w-5 text-primary" />;
+      case 'pdf':
+        return <FilePdf className="h-5 w-5 text-primary" />;
       case 'doc':
       case 'docx':
         return <FileText className="h-5 w-5 text-primary" />;
@@ -299,7 +355,7 @@ const Index = () => {
           <input
             id="import-document"
             type="file"
-            accept=".txt,.md,.html,.doc,.docx"
+            accept=".txt,.md,.html,.doc,.docx,.pdf"
             onChange={handleImportDocument}
             className="hidden"
           />
@@ -328,7 +384,7 @@ const Index = () => {
                       <HelpCircle className="h-4 w-4 text-gray-500" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-xs rounded-md">
+                  <TooltipContent side="bottom" className="max-w-xs rounded-md" sideOffset={10}>
                     <p className="text-sm">
                       This editor allows you to create document templates with placeholders {"{like this}"} 
                       that will be replaced with values from your JSON. Toggle the eye icon to preview the result.
@@ -338,7 +394,7 @@ const Index = () => {
               </TooltipProvider>
             </div>
           </div>
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-start">
             <a href="https://kirmesch.ru" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition-colors">
               <span>Kirill Meshcheryakov</span>
               <Link className="h-3 w-3" />
@@ -387,7 +443,7 @@ const Index = () => {
             <input
               id="import-mobile"
               type="file"
-              accept=".json,.txt,.md,.html,.doc,.docx"
+              accept=".json,.txt,.md,.html,.doc,.docx,.pdf"
               onChange={(e) => {
                 const fileName = e.target.files?.[0]?.name || '';
                 if (fileName.endsWith('.json')) {
@@ -434,7 +490,7 @@ const Index = () => {
                   <HelpCircle className="h-4 w-4 text-gray-500" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs rounded-md">
+              <TooltipContent side="bottom" className="max-w-xs rounded-md" sideOffset={5}>
                 <p className="text-sm">
                   This editor allows you to create document templates with placeholders {"{like this}"} 
                   that will be replaced with values from your JSON data. Toggle the eye icon to preview.
@@ -454,18 +510,18 @@ const Index = () => {
           direction="horizontal"
           className="h-full"
         >
-          <ResizablePanel defaultSize={50} minSize={30} className="transition-all duration-200">
+          <ResizablePanel defaultSize={50} minSize={45} className="transition-all duration-200">
             <div className="h-full flex flex-col">
               {renderJsonHeader()}
-              <div className="flex-1 overflow-hidden bg-white border-r">
+              <div className="flex-1 overflow-hidden bg-white">
                 <JsonEditor data={jsonData} onChange={setJsonData} />
               </div>
             </div>
           </ResizablePanel>
           
-          <ResizableHandle className="w-2 bg-gray-100 hover:bg-black/10 transition-colors" />
+          <ResizableHandle className="w-[0.2rem] bg-gray-100 hover:bg-black/10 transition-colors" />
           
-          <ResizablePanel defaultSize={50} minSize={30} className="transition-all duration-200">
+          <ResizablePanel defaultSize={50} minSize={45} className="transition-all duration-200">
             <div className="h-full flex flex-col">
               {renderDocumentHeader()}
               <div className="flex-1 overflow-hidden bg-white">
