@@ -30,3 +30,19 @@
 .cm-scroller {
   overflow: auto !important;
 }
+
+/* Fix editor rendering issues */
+.cm-focused {
+  outline: none !important;
+}
+
+/* Fix content wrapping issues */
+.cm-content {
+  padding: 4px 8px !important;
+}
+
+/* Improve syntax highlighting visibility */
+.cm-line {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}

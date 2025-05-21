@@ -7,14 +7,19 @@ import './index.css'
 const renderApp = () => {
   try {
     const rootElement = document.getElementById("root");
-    if (rootElement) {
-      createRoot(rootElement).render(<App />);
-    } else {
-      console.error("Root element not found");
+    if (!rootElement) {
+      console.error("Root element with id 'root' not found in the document");
+      return;
     }
+    
+    const root = createRoot(rootElement);
+    root.render(<App />);
   } catch (error) {
     console.error("Error rendering application:", error);
   }
 };
 
-renderApp();
+// Execute the renderApp function when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+  renderApp();
+});

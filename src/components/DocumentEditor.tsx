@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { html } from "@codemirror/lang-html";
 import { markdown } from "@codemirror/lang-markdown";
@@ -25,12 +25,12 @@ const DocumentEditor = ({
   const [error, setError] = useState<string | null>(null);
 
   // Error handling function
-  const handleEditorError = (err: any) => {
+  const handleEditorError = useCallback((err: any) => {
     console.error("Document editor error:", err);
     setError("Error in document editor");
     // Continue with default content
     setDisplayContent(content || "");
-  };
+  }, [content]);
 
   // Detect file type from content
   useEffect(() => {
@@ -52,7 +52,7 @@ const DocumentEditor = ({
     } catch (err) {
       handleEditorError(err);
     }
-  }, [content]);
+  }, [content, handleEditorError]);
 
   // Process content with placeholders
   useEffect(() => {
@@ -74,7 +74,7 @@ const DocumentEditor = ({
     } catch (err) {
       handleEditorError(err);
     }
-  }, [content, jsonData, showPlaceholders]);
+  }, [content, jsonData, showPlaceholders, handleEditorError]);
 
   // Auto-switch to edit mode when clicking editor
   const handleEditorClick = () => {
