@@ -14,6 +14,7 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
   const [error, setError] = useState<string | null>(null);
   const [internalUpdate, setInternalUpdate] = useState(false);
 
+  // Handle initial data loading and updates
   useEffect(() => {
     try {
       // Only update content from props if not an internal update
@@ -29,6 +30,11 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
     } catch (err) {
       console.error("Error stringifying JSON data:", err);
       setError("Error processing JSON data");
+      
+      // Fallback to empty object
+      if (!content) {
+        setContent("{}");
+      }
     }
   }, [data, internalUpdate]);
 
@@ -66,17 +72,13 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
         extensions={[json()]}
         onChange={handleChange}
         theme="light"
-        className="h-full json-editor"
+        className="h-full w-full json-editor"
         basicSetup={{
           lineNumbers: true,
           highlightActiveLine: true,
           highlightSelectionMatches: true,
           autocompletion: true,
           foldGutter: true,
-        }}
-        style={{
-          width: "100%",
-          height: "100%",
         }}
       />
     </div>

@@ -20,7 +20,7 @@ const DocumentEditor = ({
 }: DocumentEditorProps) => {
   const [showPlaceholders, setShowPlaceholders] = useState(false); // Start with edit mode
   const [fileType, setFileType] = useState<"markdown" | "html" | "text" | "pdf">("markdown");
-  const [displayContent, setDisplayContent] = useState(content);
+  const [displayContent, setDisplayContent] = useState(content || "");
   const [isEditing, setIsEditing] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,12 +29,17 @@ const DocumentEditor = ({
     console.error("Document editor error:", err);
     setError("Error in document editor");
     // Continue with default content
-    setDisplayContent(content);
+    setDisplayContent(content || "");
   };
 
   // Detect file type from content
   useEffect(() => {
     try {
+      if (!content) {
+        setFileType("text");
+        return;
+      }
+      
       if (content.includes("<!DOCTYPE html>") || content.includes("<html")) {
         setFileType("html");
       } else if (content.includes("#") || content.includes("**")) {
@@ -49,10 +54,10 @@ const DocumentEditor = ({
     }
   }, [content]);
 
-  // Process content with placeholders - Fixed to replace ALL placeholders
+  // Process content with placeholders
   useEffect(() => {
     try {
-      if (showPlaceholders) {
+      if (showPlaceholders && content) {
         let processed = content;
         const placeholderRegex = /{([^}]+)}/g;
         processed = processed.replace(placeholderRegex, (match, key) => {
@@ -62,7 +67,7 @@ const DocumentEditor = ({
         setDisplayContent(processed);
         setIsEditing(false); // When showing placeholders, we're in view mode
       } else {
-        setDisplayContent(content);
+        setDisplayContent(content || "");
         setIsEditing(true); // When not showing placeholders, we're in edit mode
       }
       setError(null);
@@ -138,12 +143,6 @@ const DocumentEditor = ({
             highlightActiveLine: isEditing,
             foldGutter: true,
             autocompletion: isEditing
-          }} 
-          style={{
-            fontSize: "14px",
-            fontFamily: "'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif",
-            width: "100%",
-            height: "100%"
           }} 
           className="h-full document-editor" 
         />
