@@ -20,13 +20,14 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
       // Only update content from props if not an internal update
       if (!internalUpdate) {
         // If there's invalid content stored, use that instead
-        if (data._invalidContent) {
+        if (data && data._invalidContent) {
           setContent(data._invalidContent);
         } else {
-          setContent(JSON.stringify(data, null, 2));
+          setContent(JSON.stringify(data || {}, null, 2));
         }
       }
       setInternalUpdate(false);
+      setError(null);
     } catch (err) {
       console.error("Error stringifying JSON data:", err);
       setError("Error processing JSON data");
@@ -36,7 +37,7 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
         setContent("{}");
       }
     }
-  }, [data, internalUpdate]);
+  }, [data, internalUpdate, content]);
 
   const handleChange = (value: string) => {
     setContent(value);

@@ -18,7 +18,7 @@ const DocumentEditor = ({
   onChange,
   jsonData
 }: DocumentEditorProps) => {
-  const [showPlaceholders, setShowPlaceholders] = useState(false); // Start with edit mode
+  const [showPlaceholders, setShowPlaceholders] = useState(false);
   const [fileType, setFileType] = useState<"markdown" | "html" | "text" | "pdf">("markdown");
   const [displayContent, setDisplayContent] = useState(content || "");
   const [isEditing, setIsEditing] = useState(true);

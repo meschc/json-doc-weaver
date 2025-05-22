@@ -7,7 +7,7 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
-// Create query client with error handling and retry configuration
+// Create query client with proper configuration for newer versions of React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -28,7 +28,6 @@ const App = () => {
         <HashRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            {/* All custom routes go above the catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </HashRouter>

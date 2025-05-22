@@ -20,6 +20,4 @@ const renderApp = () => {
 };
 
 // Execute the renderApp function when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-  renderApp();
-});
+document.addEventListener('DOMContentLoaded', renderApp);
