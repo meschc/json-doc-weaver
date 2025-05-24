@@ -12,58 +12,39 @@ interface JsonEditorProps {
 const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [internalUpdate, setInternalUpdate] = useState(false);
 
-  // Handle initial data loading and updates
   useEffect(() => {
     try {
-      // Only update content from props if not an internal update
-      if (!internalUpdate) {
-        // If there's invalid content stored, use that instead
-        if (data && data._invalidContent) {
-          setContent(data._invalidContent);
-        } else {
-          setContent(JSON.stringify(data || {}, null, 2));
-        }
+      if (data && data._invalidContent) {
+        setContent(data._invalidContent);
+      } else {
+        setContent(JSON.stringify(data || {}, null, 2));
       }
-      setInternalUpdate(false);
       setError(null);
     } catch (err) {
       console.error("Error stringifying JSON data:", err);
       setError("Error processing JSON data");
-      
-      // Fallback to empty object
-      if (!content) {
-        setContent("{}");
-      }
+      setContent("{}");
     }
-  }, [data, internalUpdate, content]);
+  }, [data]);
 
   const handleChange = (value: string) => {
     setContent(value);
-    setInternalUpdate(true);
     
     try {
       const parsed = JSON.parse(value);
       onChange(parsed);
       setError(null);
     } catch (err) {
-      // Only show error when user stops typing for a bit
-      const timer = setTimeout(() => {
-        setError("Invalid JSON format");
-      }, 1000);
-      
-      // Still update the content even if it's invalid
+      setError("Invalid JSON format");
       onChange({ ...data, _invalidContent: value });
-      
-      return () => clearTimeout(timer);
     }
   };
 
   return (
     <div className="relative h-full">
       {error && (
-        <div className="absolute top-2 right-2 bg-destructive/90 text-destructive-foreground px-3 py-1.5 rounded-md text-sm animate-fade-in z-10 backdrop-blur-sm shadow-md">
+        <div className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1.5 rounded-md text-sm z-10">
           {error}
         </div>
       )}
@@ -73,11 +54,10 @@ const JsonEditor = ({ data, onChange }: JsonEditorProps) => {
         extensions={[json()]}
         onChange={handleChange}
         theme="light"
-        className="h-full w-full json-editor"
+        className="h-full w-full"
         basicSetup={{
           lineNumbers: true,
           highlightActiveLine: true,
-          highlightSelectionMatches: true,
           autocompletion: true,
           foldGutter: true,
         }}
